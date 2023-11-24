@@ -51,6 +51,7 @@ var (
 	VarBoolStrict bool
 	// VarStringSliceIgnoreColumns represents the columns which are ignored.
 	VarStringSliceIgnoreColumns []string
+	VarStringMode               string
 )
 
 var errNotMatched = errors.New("sql not matched")
@@ -67,6 +68,7 @@ func MysqlDDL(_ *cobra.Command, _ []string) error {
 	home := VarStringHome
 	remote := VarStringRemote
 	branch := VarStringBranch
+	mode := VarStringMode
 	if len(remote) > 0 {
 		repo, _ := file.CloneIntoGitHome(remote, branch)
 		if len(repo) > 0 {
@@ -90,8 +92,16 @@ func MysqlDDL(_ *cobra.Command, _ []string) error {
 		database:      database,
 		strict:        VarBoolStrict,
 		ignoreColumns: mergeColumns(VarStringSliceIgnoreColumns),
+		mode:          mode,
 	}
-	return fromDDL(arg)
+	switch mode {
+	case "":
+		return fromDDL(arg)
+	case "gorm":
+		return fromGormDDL(arg)
+	default:
+		return errors.New("invalid mode only support [gorm]")
+	}
 }
 
 // MySqlDataSource generates model code from datasource
@@ -226,6 +236,7 @@ type ddlArg struct {
 	database      string
 	strict        bool
 	ignoreColumns []string
+	mode          string
 }
 
 func fromDDL(arg ddlArg) error {

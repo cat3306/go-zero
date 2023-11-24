@@ -22,6 +22,9 @@ var Types string
 //go:embed tpl/tag.tpl
 var Tag string
 
+//go:embed tpl/gorm-tag.tpl
+var GormTag string
+
 // TableName defines a template that generate the tableName method.
 //
 //go:embed tpl/table-name.tpl

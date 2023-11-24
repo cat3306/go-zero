@@ -26,3 +26,23 @@ func genTag(table Table, in string) (string, error) {
 
 	return output.String(), nil
 }
+
+func genGormTag(table Table, in string) (string, error) {
+	if in == "" {
+		return in, nil
+	}
+	text, err := pathx.LoadTemplate(category, tagGormTemplateFile, template.GormTag)
+	if err != nil {
+		return "", err
+	}
+
+	output, err := util.With("tag").Parse(text).Execute(map[string]any{
+		"field": in,
+		"data":  table,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return output.String(), nil
+}

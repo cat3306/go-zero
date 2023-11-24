@@ -171,7 +171,8 @@
           "idea": "For idea plugin [optional]",
           "home": "{{.global.home}}",
           "remote": "{{.global.remote}}",
-          "branch": "{{.global.branch}}"
+          "branch": "{{.global.branch}}",
+          "mode": "chose gorm style"
         }
       },
       "pg": {
