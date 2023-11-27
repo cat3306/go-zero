@@ -53,7 +53,7 @@ func genGormTypes(table Table) (string, error) {
 			"upperStartCamelObject": table.Name.ToCamel(),
 			"lowerStartCamelObject": stringx.From(table.Name.ToCamel()).Untitle(),
 			"fields":                fieldsString,
-			"tableName":             table.Name.Source(),
+			"tableName":             table.FullName.Source(),
 		})
 	if err != nil {
 		return "", err

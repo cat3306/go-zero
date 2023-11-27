@@ -148,7 +148,7 @@ func (g *GormGenerator) GenMethod(table Table) (string, error) {
 		"upperStartCamelObject": camel,
 		"primaryKeyFieldType":   table.PrimaryKey.Field.DataType,
 		"primaryKeyField":       table.PrimaryKey.Field.Name.Source(),
-		"tableName":             table.Name.Source(),
+		"tableName":             table.FullName.Source(),
 	})
 	if err != nil {
 		return "", err

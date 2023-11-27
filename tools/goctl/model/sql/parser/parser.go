@@ -23,6 +23,7 @@ type (
 	Table struct {
 		Name        stringx.String
 		Db          stringx.String
+		FullName    stringx.String
 		PrimaryKey  Primary
 		UniqueIndex map[string][]*Field
 		Fields      []*Field
@@ -160,10 +161,14 @@ func Parse(filename, database string, strict bool) ([]*Table, error) {
 		}
 
 		checkDuplicateUniqueIndex(uniqueIndex, e.Name)
-
+		fullName := stringx.From(e.Name)
+		if database != "" {
+			fullName = stringx.From(database + "." + e.Name)
+		}
 		list = append(list, &Table{
 			Name:        stringx.From(e.Name),
 			Db:          stringx.From(database),
+			FullName:    fullName,
 			PrimaryKey:  primaryKey,
 			UniqueIndex: uniqueIndex,
 			Fields:      fields,
