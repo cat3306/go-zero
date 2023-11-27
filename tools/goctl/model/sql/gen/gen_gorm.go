@@ -6,18 +6,21 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/template"
-	modelutil "github.com/zeromicro/go-zero/tools/goctl/model/sql/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type GormGenerator struct {
 	generatorConf
+}
+type gormCode struct {
+	importsCode string
+	typesCode   string
+	methodCode  string
 }
 
 // NewGormGenerator creates an instance for defaultGenerator
@@ -134,6 +137,47 @@ func (g *GormGenerator) createFile(modelList map[string]*codeTuple) error {
 	g.Success("Done.")
 	return nil
 }
+func (g *GormGenerator) GenMethod(table Table) (string, error) {
+	text, err := pathx.LoadTemplate(category, createGormTemplateFile, template.GormMethod)
+	if err != nil {
+		return "", err
+	}
+	camel := table.Name.ToCamel()
+	buffer, err := util.With("create").Parse(text).Execute(map[string]any{
+		"data":                  table,
+		"upperStartCamelObject": camel,
+		"primaryKeyFieldType":   table.PrimaryKey.Field.DataType,
+		"primaryKeyField":       table.PrimaryKey.Field.Name.Source(),
+		"tableName":             table.Name.Source(),
+	})
+	if err != nil {
+		return "", err
+	}
+	buffer.Write([]byte("\n"))
+
+	text1, err := pathx.LoadTemplate(category, findGormOneByFieldTemplateFile, template.GormFindOneByField)
+	if err != nil {
+		return "", err
+	}
+	for _, v := range table.UniqueIndex {
+		if len(v) == 0 {
+			continue
+		}
+		f := v[0]
+		tmpBuf, err := util.With("findOneByField").Parse(text1).Execute(map[string]any{
+			"upperStartCamelObject": camel,
+			"upperKeyField":         f.Name.ToCamel(),
+			"keyFieldType":          f.DataType,
+			"keyField":              f.Name.Source(),
+		})
+		if err != nil {
+			continue
+		}
+		buffer.Write(tmpBuf.Bytes())
+		buffer.Write([]byte("\n"))
+	}
+	return buffer.String(), nil
+}
 func (g *GormGenerator) genModel(in parser.Table, withCache bool) (string, error) {
 	if len(in.PrimaryKey.Name.Source()) == 0 {
 		return "", fmt.Errorf("table %s: missing primary key", in.Name.Source())
@@ -147,72 +191,23 @@ func (g *GormGenerator) genModel(in parser.Table, withCache bool) (string, error
 	table.UniqueCacheKey = uniqueKey
 	table.ContainsUniqueCacheKey = len(uniqueKey) > 0
 	table.ignoreColumns = g.ignoreColumns
-
-	importsCode, err := gormGenImports(table, withCache, in.ContainsTime())
+	importsCode, err := gormGenImports(in.ContainsTime())
+	if err != nil {
+		return "", err
+	}
+	methodCode, err := g.GenMethod(table)
+	if err != nil {
+		return "", err
+	}
+	typesCode, err := genGormTypes(table)
 	if err != nil {
 		return "", err
 	}
 
-	//varsCode, err := genVars(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-
-	insertCode, err := genGormCreate(table, withCache, g.isPostgreSql)
-	if err != nil {
-		return "", err
-	}
-
-	//findCode := make([]string, 0)
-	//findOneCode, findOneCodeMethod, err := genFindOne(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//ret, err := genFindOneByField(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//findCode = append(findCode, findOneCode, ret.findOneMethod)
-	//updateCode, updateCodeMethod, err := genUpdate(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//deleteCode, deleteCodeMethod, err := genDelete(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	var list []string
-	//list = append(list, findOneCodeMethod, ret.findOneInterfaceMethod,
-	//	updateCodeMethod, deleteCodeMethod)
-	typesCode, err := genGormTypes(table, strings.Join(modelutil.TrimStringSlice(list), pathx.NL), withCache)
-	if err != nil {
-		return "", err
-	}
-	//
-	//newCode, err := genNew(table, withCache, g.isPostgreSql)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	tableName, err := genGormTableName(table)
-	if err != nil {
-		return "", err
-	}
-
-	code := &code{
+	code := &gormCode{
 		importsCode: importsCode,
 		typesCode:   typesCode,
-		//newCode:     newCode,
-		insertCode: insertCode,
-		//findCode:    findCode,
-		//updateCode:  updateCode,
-		//deleteCode:  deleteCode,
-		//cacheExtra:  ret.cacheExtra,
-		tableName: tableName,
+		methodCode:  methodCode,
 	}
 
 	output, err := g.executeModel(table, code)
@@ -245,7 +240,7 @@ func (g *GormGenerator) genModelCustom(in parser.Table, withCache bool) (string,
 	return output.String(), nil
 }
 
-func (g *GormGenerator) executeModel(table Table, code *code) (*bytes.Buffer, error) {
+func (g *GormGenerator) executeModel(table Table, code *gormCode) (*bytes.Buffer, error) {
 	text, err := pathx.LoadTemplate(category, modelGormGenTemplateFile, template.GormModelGen)
 	if err != nil {
 
@@ -257,16 +252,8 @@ func (g *GormGenerator) executeModel(table Table, code *code) (*bytes.Buffer, er
 	output, err := t.Execute(map[string]interface{}{
 		"pkg":     g.pkg,
 		"imports": code.importsCode,
-		//"vars":        code.varsCode,
-		"types": code.typesCode,
-		//"new":         code.newCode,
-		"insert": code.insertCode,
-		/*	"find":        strings.Join(code.findCode, "\n"),
-			"update":      code.updateCode,
-			"delete":      code.deleteCode,
-			"extraMethod": code.cacheExtra,*/
-		"tableName": code.tableName,
-		//"data":        table,
+		"types":   code.typesCode,
+		"method":  code.methodCode,
 	})
 	if err != nil {
 		return nil, err

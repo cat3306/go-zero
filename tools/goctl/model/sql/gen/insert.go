@@ -88,19 +88,3 @@ func genInsert(table Table, withCache, postgreSql bool) (string, string, error) 
 
 	return output.String(), insertMethodOutput.String(), nil
 }
-func genGormCreate(table Table, withCache, postgreSql bool) (string, error) {
-	text, err := pathx.LoadTemplate(category, createGormTemplateFile, template.GormCreate)
-	if err != nil {
-		return "", err
-	}
-	camel := table.Name.ToCamel()
-	buffer, err := util.With("create").Parse(text).Execute(map[string]any{
-		"data":                  table,
-		"upperStartCamelObject": camel,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return buffer.String(), nil
-}

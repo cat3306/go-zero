@@ -38,6 +38,8 @@ const (
 	modelGormGenTemplateFile              = "gorm-model-gen.tpl"
 	tableGormNameTemplateFile             = "gorm-table-name.tpl"
 	errGormTemplateFile                   = "gorm-err.tpl"
+	methodGormTemplateFile                = "gorm-method.tpl"
+	findGormOneByFieldTemplateFile        = "gorm-find-one-by-field.tpl"
 )
 
 var templates = map[string]string{
@@ -65,10 +67,10 @@ var templates = map[string]string{
 	errTemplateFile:                       template.Error,
 	tagGormTemplateFile:                   template.GormTag,
 	importGormTemplateFile:                template.GormImports,
-	createGormTemplateFile:                template.GormCreate,
 	modelGormGenTemplateFile:              template.GormModelGen,
-	tableGormNameTemplateFile:             template.GormTableName,
 	errGormTemplateFile:                   template.GormError,
+	methodGormTemplateFile:                template.GormMethod,
+	findGormOneByFieldTemplateFile:        template.GormFindOneByField,
 }
 
 // Category returns model const value

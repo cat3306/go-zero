@@ -35,7 +35,7 @@ func genTypes(table Table, methods string, withCache bool) (string, error) {
 
 	return output.String(), nil
 }
-func genGormTypes(table Table, methods string, withCache bool) (string, error) {
+func genGormTypes(table Table) (string, error) {
 	fields := table.Fields
 	fieldsString, err := genGormFields(table, fields)
 	if err != nil {
@@ -50,12 +50,10 @@ func genGormTypes(table Table, methods string, withCache bool) (string, error) {
 	output, err := util.With("types").
 		Parse(text).
 		Execute(map[string]any{
-			//"withCache":             withCache,
-			//"method":                methods,
 			"upperStartCamelObject": table.Name.ToCamel(),
 			"lowerStartCamelObject": stringx.From(table.Name.ToCamel()).Untitle(),
 			"fields":                fieldsString,
-			"data":                  table,
+			"tableName":             table.Name.Source(),
 		})
 	if err != nil {
 		return "", err
