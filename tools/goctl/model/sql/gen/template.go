@@ -32,6 +32,12 @@ const (
 	varTemplateFile                       = "var.tpl"
 	errTemplateFile                       = "err.tpl"
 	tagGormTemplateFile                   = "gorm-tag.tpl"
+	importGormTemplateFile                = "gorm-import.tpl"
+	createGormTemplateFile                = "gorm-create.tpl"
+	typesGormTemplateFile                 = "gorm-types.tpl"
+	modelGormGenTemplateFile              = "gorm-model-gen.tpl"
+	tableGormNameTemplateFile             = "gorm-table-name.tpl"
+	errGormTemplateFile                   = "gorm-err.tpl"
 )
 
 var templates = map[string]string{
@@ -58,6 +64,11 @@ var templates = map[string]string{
 	varTemplateFile:                       template.Vars,
 	errTemplateFile:                       template.Error,
 	tagGormTemplateFile:                   template.GormTag,
+	importGormTemplateFile:                template.GormImports,
+	createGormTemplateFile:                template.GormCreate,
+	modelGormGenTemplateFile:              template.GormModelGen,
+	tableGormNameTemplateFile:             template.GormTableName,
+	errGormTemplateFile:                   template.GormError,
 }
 
 // Category returns model const value

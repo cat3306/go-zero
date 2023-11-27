@@ -30,7 +30,7 @@ func fromGormDDL(arg ddlArg) error {
 	}
 
 	for _, file := range files {
-		err = generator.StartFromDDL(file, arg.cache, arg.database, arg.strict)
+		err = generator.StartFromDDL(file, arg.cache, arg.strict, arg.database)
 		if err != nil {
 			return err
 		}

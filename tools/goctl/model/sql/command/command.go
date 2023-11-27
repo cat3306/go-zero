@@ -94,14 +94,7 @@ func MysqlDDL(_ *cobra.Command, _ []string) error {
 		ignoreColumns: mergeColumns(VarStringSliceIgnoreColumns),
 		mode:          mode,
 	}
-	switch mode {
-	case "":
-		return fromDDL(arg)
-	case "gorm":
-		return fromGormDDL(arg)
-	default:
-		return errors.New("invalid mode only support [gorm]")
-	}
+	return fromDDL(arg)
 }
 
 // MySqlDataSource generates model code from datasource
@@ -254,15 +247,25 @@ func fromDDL(arg ddlArg) error {
 	if len(files) == 0 {
 		return errNotMatched
 	}
-
-	generator, err := gen.NewDefaultGenerator(arg.dir, arg.cfg,
-		gen.WithConsoleOption(log), gen.WithIgnoreColumns(arg.ignoreColumns))
+	var (
+		generator gen.Generator
+	)
+	switch arg.mode {
+	case "":
+		generator, err = gen.NewDefaultGenerator(arg.dir, arg.cfg,
+			gen.WithConsoleOption(log), gen.WithIgnoreColumns(arg.ignoreColumns))
+	case "gorm":
+		generator, err = gen.NewGormGenerator(arg.dir, arg.cfg,
+			gen.WithConsoleOption(log), gen.WithIgnoreColumns(arg.ignoreColumns))
+	default:
+		return errors.New("invalid mode only support [gorm]")
+	}
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		err = generator.StartFromDDL(file, arg.cache, arg.strict, arg.database)
+	for _, f := range files {
+		err = generator.StartFromDDL(f, arg.cache, arg.strict, arg.database)
 		if err != nil {
 			return err
 		}

@@ -22,7 +22,7 @@ import (
 const pwd = "."
 
 type (
-	defaultGenerator struct {
+	generatorConf struct {
 		console.Console
 		// source string
 		dir           string
@@ -31,9 +31,12 @@ type (
 		isPostgreSql  bool
 		ignoreColumns []string
 	}
+	defaultGenerator struct {
+		generatorConf
+	}
 
 	// Option defines a function with argument defaultGenerator
-	Option func(generator *defaultGenerator)
+	Option func(conf *generatorConf)
 
 	code struct {
 		importsCode string
@@ -71,12 +74,14 @@ func NewDefaultGenerator(dir string, cfg *config.Config, opt ...Option) (*defaul
 		return nil, err
 	}
 
-	generator := &defaultGenerator{dir: dir, cfg: cfg, pkg: pkg}
+	generator := &defaultGenerator{generatorConf{
+		dir: dir, cfg: cfg, pkg: pkg,
+	}}
 	var optionList []Option
 	optionList = append(optionList, newDefaultOption())
 	optionList = append(optionList, opt...)
 	for _, fn := range optionList {
-		fn(generator)
+		fn(&generator.generatorConf)
 	}
 
 	return generator, nil
@@ -84,27 +89,27 @@ func NewDefaultGenerator(dir string, cfg *config.Config, opt ...Option) (*defaul
 
 // WithConsoleOption creates a console option.
 func WithConsoleOption(c console.Console) Option {
-	return func(generator *defaultGenerator) {
+	return func(generator *generatorConf) {
 		generator.Console = c
 	}
 }
 
 // WithIgnoreColumns ignores the columns while insert or update rows.
 func WithIgnoreColumns(ignoreColumns []string) Option {
-	return func(generator *defaultGenerator) {
+	return func(generator *generatorConf) {
 		generator.ignoreColumns = ignoreColumns
 	}
 }
 
 // WithPostgreSql marks  defaultGenerator.isPostgreSql true.
 func WithPostgreSql() Option {
-	return func(generator *defaultGenerator) {
+	return func(generator *generatorConf) {
 		generator.isPostgreSql = true
 	}
 }
 
 func newDefaultOption() Option {
-	return func(generator *defaultGenerator) {
+	return func(generator *generatorConf) {
 		generator.Console = console.NewColorConsole()
 	}
 }

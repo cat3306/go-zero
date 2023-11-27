@@ -41,3 +41,24 @@ func genImports(table Table, withCache, timeImport bool) (string, error) {
 
 	return buffer.String(), nil
 }
+
+func gormGenImports(table Table, withCache, timeImport bool) (string, error) {
+	if withCache {
+		//TODO
+	}
+
+	text, err := pathx.LoadTemplate(category, importGormTemplateFile, template.GormImports)
+	if err != nil {
+		return "", err
+	}
+
+	buffer, err := util.With("import").Parse(text).Execute(map[string]any{
+		"time": timeImport,
+		"data": table,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return buffer.String(), nil
+}

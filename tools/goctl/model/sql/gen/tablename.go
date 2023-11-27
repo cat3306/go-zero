@@ -24,3 +24,22 @@ func genTableName(table Table) (string, error) {
 
 	return output.String(), nil
 }
+
+func genGormTableName(table Table) (string, error) {
+	text, err := pathx.LoadTemplate(category, tableGormNameTemplateFile, template.GormTableName)
+	if err != nil {
+		return "", err
+	}
+
+	output, err := util.With("tableName").
+		Parse(text).
+		Execute(map[string]any{
+			"tableName":             table.Name.Source(),
+			"upperStartCamelObject": table.Name.ToCamel(),
+		})
+	if err != nil {
+		return "", nil
+	}
+
+	return output.String(), nil
+}

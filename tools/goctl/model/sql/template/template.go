@@ -130,3 +130,25 @@ var Delete string
 //
 //go:embed tpl/interface-delete.tpl
 var DeleteMethod string
+
+//go:embed tpl/gorm-import.tpl
+var GormImports string
+
+//go:embed tpl/gorm-create.tpl
+var GormCreate string
+var GormModelGen = fmt.Sprintf(`%s
+package {{.pkg}}
+{{.imports}}
+{{.types}}
+{{.tableName}}
+{{.insert}}
+`, util.DoNotEditHead)
+
+//go:embed tpl/gorm-types.tpl
+var GormTypes string
+
+//go:embed tpl/gorm-table-name.tpl
+var GormTableName string
+
+//go:embed tpl/gorm-err.tpl
+var GormError string
