@@ -164,7 +164,7 @@ func (g *GormGenerator) createFile(modelList map[string]*codeTuple) error {
 	return nil
 }
 func (g *GormGenerator) GenMethod(table Table) (string, error) {
-	text, err := pathx.LoadTemplate(category, createGormTemplateFile, template.GormMethod)
+	text, err := pathx.LoadTemplate(category, methodGormTemplateFile, template.GormMethod)
 	if err != nil {
 		return "", err
 	}
