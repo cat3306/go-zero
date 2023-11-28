@@ -49,3 +49,7 @@ func (l*{{.upperStartCamelObject}}List)FindByPage(db *gorm.DB, page int, size in
         err = db.Offset((page - 1) * size).Limit(size).Find(&l).Error
         return
 }
+
+func (l *{{.upperStartCamelObject}}List) Create(db *gorm.DB, batchSize int) error {
+	return db.CreateInBatches(l, batchSize).Error
+}

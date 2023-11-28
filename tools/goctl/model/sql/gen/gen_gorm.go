@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/zeromicro/go-zero/tools/goctl/config"
+	"github.com/zeromicro/go-zero/tools/goctl/model/sql/model"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/template"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -76,6 +77,31 @@ func (g *GormGenerator) genFromDDL(filename string, withCache, strict bool, data
 	}
 
 	return m, nil
+}
+func (g *GormGenerator) StartFromInformationSchema(tables map[string]*model.Table, withCache, strict bool) error {
+	m := make(map[string]*codeTuple)
+	for _, each := range tables {
+		table, err := parser.ConvertDataType(each, strict)
+		if err != nil {
+			return err
+		}
+
+		code, err := g.genModel(*table, withCache)
+		if err != nil {
+			return err
+		}
+		customCode, err := g.genModelCustom(*table, withCache)
+		if err != nil {
+			return err
+		}
+
+		m[table.Name.Source()] = &codeTuple{
+			modelCode:       code,
+			modelCustomCode: customCode,
+		}
+	}
+
+	return g.createFile(m)
 }
 func (g *GormGenerator) StartFromDDL(filename string, withCache, strict bool, database string) error {
 	modelList, err := g.genFromDDL(filename, withCache, strict, database)

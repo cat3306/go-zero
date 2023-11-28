@@ -45,6 +45,7 @@ func init() {
 	datasourceCmdFlags.StringVar(&command.VarStringHome, "home")
 	datasourceCmdFlags.StringVar(&command.VarStringRemote, "remote")
 	datasourceCmdFlags.StringVar(&command.VarStringBranch, "branch")
+	datasourceCmdFlags.StringVarP(&command.VarStringMode, "mode", "m")
 
 	pgDatasourceCmdFlags.StringVar(&command.VarStringURL, "url")
 	pgDatasourceCmdFlags.StringSliceVarP(&command.VarStringSliceTable, "table", "t")
