@@ -285,6 +285,10 @@ func ConvertDataType(table *model.Table, strict bool) (*Table, error) {
 	reply.UniqueIndex = map[string][]*Field{}
 	reply.Name = stringx.From(table.Table)
 	reply.Db = stringx.From(table.Db)
+	reply.FullName = reply.Name
+	if table.Db != "" {
+		reply.FullName = stringx.From(table.Db + "." + table.Table)
+	}
 	seqInIndex := 0
 	if table.PrimaryKey.Index != nil {
 		seqInIndex = table.PrimaryKey.Index.SeqInIndex
