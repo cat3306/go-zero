@@ -26,7 +26,8 @@ var (
 	// VarStringBranch describes the git branch.
 	VarStringBranch string
 	// VarStringStyle describes the style of output files.
-	VarStringStyle string
+	VarStringStyle     string
+	VarStringComponent string
 )
 
 // CreateServiceCommand fast create service
@@ -37,6 +38,10 @@ func CreateServiceCommand(_ *cobra.Command, args []string) error {
 	}
 	if strings.Contains(dirName, "-") {
 		return errors.New("api new command service name not support strikethrough, because this will used by function name")
+	}
+	_, err := gogen.CheckComponentsValid(VarStringComponent)
+	if err != nil {
+		return err
 	}
 
 	abs, err := filepath.Abs(dirName)
@@ -83,6 +88,6 @@ func CreateServiceCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = gogen.DoGenProject(apiFilePath, abs, VarStringStyle)
+	err = gogen.DoGenProject(apiFilePath, abs, VarStringStyle, VarStringComponent)
 	return err
 }

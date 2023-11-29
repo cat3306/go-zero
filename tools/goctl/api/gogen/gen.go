@@ -66,11 +66,11 @@ func GoCommand(_ *cobra.Command, _ []string) error {
 		return errors.New("missing -dir")
 	}
 
-	return DoGenProject(apiFile, dir, namingStyle)
+	return DoGenProject(apiFile, dir, namingStyle, "")
 }
 
 // DoGenProject gen go project files with api file
-func DoGenProject(apiFile, dir, style string) error {
+func DoGenProject(apiFile, dir, style, components string) error {
 	api, err := parser.Parse(apiFile)
 	if err != nil {
 		return err
@@ -91,8 +91,8 @@ func DoGenProject(apiFile, dir, style string) error {
 		return err
 	}
 
-	logx.Must(genEtc(dir, cfg, api))
-	logx.Must(genConfig(dir, cfg, api))
+	logx.Must(genEtc(dir, cfg, api, components))
+	logx.Must(genConfig(dir, cfg, api, components))
 	logx.Must(genMain(dir, rootPkg, cfg, api))
 	logx.Must(genServiceContext(dir, rootPkg, cfg, api))
 	logx.Must(genTypes(dir, cfg, api))
@@ -100,7 +100,8 @@ func DoGenProject(apiFile, dir, style string) error {
 	logx.Must(genHandlers(dir, rootPkg, cfg, api))
 	logx.Must(genLogic(dir, rootPkg, cfg, api))
 	logx.Must(genMiddleware(dir, cfg, api))
-
+	logx.Must(genComponents(dir, rootPkg, cfg, api, components))
+	logx.Must(genComponentConfigType(dir, cfg, api, components))
 	if err := backupAndSweep(apiFile); err != nil {
 		return err
 	}

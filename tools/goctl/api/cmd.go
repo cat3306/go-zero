@@ -84,6 +84,7 @@ func init() {
 	newCmdFlags.StringVar(&new.VarStringHome, "home")
 	newCmdFlags.StringVar(&new.VarStringRemote, "remote")
 	newCmdFlags.StringVar(&new.VarStringBranch, "branch")
+	newCmdFlags.StringVarP(&new.VarStringComponent, "component", "c")
 	newCmdFlags.StringVarWithDefaultValue(&new.VarStringStyle, "style", config.DefaultFormat)
 
 	pluginCmdFlags.StringVarP(&plugin.VarStringPlugin, "plugin", "p")
