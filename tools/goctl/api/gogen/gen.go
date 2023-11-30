@@ -93,7 +93,7 @@ func DoGenProject(apiFile, dir, style, components string) error {
 
 	logx.Must(genEtc(dir, cfg, api, components))
 	logx.Must(genConfig(dir, cfg, api, components))
-	logx.Must(genMain(dir, rootPkg, cfg, api))
+	logx.Must(genMain(dir, rootPkg, cfg, api, components))
 	logx.Must(genServiceContext(dir, rootPkg, cfg, api))
 	logx.Must(genTypes(dir, cfg, api))
 	logx.Must(genRoutes(dir, rootPkg, cfg, api))

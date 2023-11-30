@@ -67,6 +67,9 @@ func genConfig(dir string, cfg *config.Config, api *spec.ApiSpec, component stri
 }
 func genFileDataMap(component string) map[string]any {
 	r := make(map[string]any)
+	if component == "" {
+		return r
+	}
 	list := strings.Split(component, ",")
 	for _, v := range list {
 		_, ok := componentsMap[v]
@@ -75,6 +78,9 @@ func genFileDataMap(component string) map[string]any {
 	return r
 }
 func genComponentConfigType(dir string, cfg *config.Config, api *spec.ApiSpec, component string) error {
+	if component == "" {
+		return nil
+	}
 	filename, err := format.FileNamingFormat(cfg.NamingFormat, configTypeFile)
 	if err != nil {
 		return err

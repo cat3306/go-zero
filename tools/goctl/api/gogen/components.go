@@ -69,6 +69,9 @@ var (
 )
 
 func CheckComponentsValid(components string) ([]string, error) {
+	if components == "" {
+		return nil, nil
+	}
 	list := strings.Split(components, ",")
 	for _, v := range list {
 		_, ok := componentsMap[v]

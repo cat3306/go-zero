@@ -15,7 +15,7 @@ import (
 //go:embed main.tpl
 var mainTemplate string
 
-func genMain(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec) error {
+func genMain(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec, components string) error {
 	name := strings.ToLower(api.Service.Name)
 	filename, err := format.FileNamingFormat(cfg.NamingFormat, name)
 	if err != nil {
@@ -35,16 +35,19 @@ func genMain(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec) error {
 		category:        category,
 		templateFile:    mainTemplateFile,
 		builtinTemplate: mainTemplate,
-		data: map[string]string{
-			"importPackages": genMainImports(rootPkg),
+		data: map[string]any{
+			"importPackages": genMainImports(rootPkg, components != ""),
 			"serviceName":    configName,
+			"hasComponent":   components != "",
 		},
 	})
 }
 
-func genMainImports(parentPkg string) string {
+func genMainImports(parentPkg string, hasComponents bool) string {
 	var imports []string
-	imports = append(imports, fmt.Sprintf("\"%s\"", pathx.JoinPackages(parentPkg, componentDir)))
+	if hasComponents {
+		imports = append(imports, fmt.Sprintf("\"%s\"", pathx.JoinPackages(parentPkg, componentDir)))
+	}
 	imports = append(imports, fmt.Sprintf("\"%s\"", pathx.JoinPackages(parentPkg, configDir)))
 	imports = append(imports, fmt.Sprintf("\"%s\"", pathx.JoinPackages(parentPkg, handlerDir)))
 	imports = append(imports, fmt.Sprintf("\"%s\"\n", pathx.JoinPackages(parentPkg, contextDir)))

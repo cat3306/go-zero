@@ -20,10 +20,12 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+	{{if .hasComponent}}
 	err := component.Init()
 	if err != nil {
 		panic(err)
 	}
+	{{end}}
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }
