@@ -14,7 +14,6 @@ const (
 	mysqlComponent       = "mysql"
 	redisComponent       = "redis"
 	componentPackageName = "component"
-	componentFile        = "component.go"
 )
 
 type componentStruct struct {
@@ -39,7 +38,7 @@ var (
 		initComponent: {
 			fileName:     "component.go",
 			templateName: "componentTemplate",
-			templateFile: "component.tpl",
+			templateFile: componentTemplateFile,
 			data: map[string]any{
 				"pkgName": componentPackageName,
 			},
@@ -49,7 +48,7 @@ var (
 			initFuncCode: "initMysql",
 			fileName:     "mysql.go",
 			templateName: "mysqlTemplate",
-			templateFile: "gorm-mysql.tpl",
+			templateFile: gormMysqlTemplateFile,
 			exportVar:    "DB",
 			data: map[string]any{
 				"pkgName":   componentPackageName,
@@ -59,10 +58,15 @@ var (
 			builtinTemplate: gormMysqlTemplate,
 		},
 		redisComponent: {
-			fileName:        "redis.go",
-			templateName:    "redisTemplate",
-			templateFile:    "redis.tpl",
-			data:            map[string]any{},
+			initFuncCode: "initRedisPool",
+			fileName:     "redis.go",
+			templateName: "redisTemplate",
+			templateFile: redisTemplateFile,
+			data: map[string]any{
+				"pkgName":   componentPackageName,
+				"initCode":  "initRedisPool",
+				"exportVar": "RedisPool",
+			},
 			builtinTemplate: redisTemplate,
 		},
 	}
@@ -94,7 +98,7 @@ func genComponents(dir string, rootPkg string, cfg *config.Config, api *spec.Api
 			return code
 		}
 		code += fmt.Sprintf(`
-		err:=%s ()
+		err =%s ()
 		if err !=nil{
 			return err
 		}

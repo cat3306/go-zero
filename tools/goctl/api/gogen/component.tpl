@@ -1,5 +1,5 @@
 package {{.pkgName}}
-func Init() error {
+func Init() (err error) {
     {{.initCode}}
     return nil
 }

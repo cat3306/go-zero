@@ -32,7 +32,7 @@ func {{.initCode}}() error {
 	if err != nil {
 		return err
 	}
-	if true {
+	if config.AppConf.DbConfig.SetLog {
 		newLogger := logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{

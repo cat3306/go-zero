@@ -10,3 +10,12 @@ DbConfig:
   ConnectPoolSize: 100
   SetLog: true
 {{end}}
+
+{{if .redis}}
+Redis:
+  Ip: 127.0.0.1
+  Port: 6379
+  Pwd: "redis-hahah@123"
+  Db:
+    - 0
+{{end}}

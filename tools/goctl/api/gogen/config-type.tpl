@@ -12,8 +12,10 @@ type DBConfig struct {
 {{end}}
 
 {{if .redis}}
-type CacheConfig struct{
-    Ip string
-    Port int
+type RedisConfig struct {
+	Ip   string
+	Port int
+	Pwd  string
+	Db   []int
 }
 {{end}}

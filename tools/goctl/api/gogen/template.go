@@ -19,6 +19,9 @@ const (
 	routesAdditionTemplateFile  = "route-addition.tpl"
 	typesTemplateFile           = "types.tpl"
 	configTypeTemplateFile      = "config-type.tpl"
+	componentTemplateFile       = "component.tpl"
+	gormMysqlTemplateFile       = "gorm-mysql.tpl"
+	redisTemplateFile           = "redis.tpl"
 )
 
 var templates = map[string]string{
@@ -33,6 +36,9 @@ var templates = map[string]string{
 	routesAdditionTemplateFile:  routesAdditionTemplate,
 	typesTemplateFile:           typesTemplate,
 	configTypeTemplateFile:      configTypeTemplate,
+	componentTemplateFile:       componentTemplate,
+	gormMysqlTemplateFile:       gormMysqlTemplate,
+	redisTemplateFile:           redisTemplate,
 }
 
 // Category returns the category of the api files.

@@ -13,4 +13,8 @@ type Config struct {
 	{{if .mysql}}
 	DbConfig DBConfig
 	{{end}}
+
+	{{if .redis}}
+    Redis RedisConfig
+    {{end}}
 }
