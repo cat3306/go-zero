@@ -1,6 +1,8 @@
 Name: {{.serviceName}}
 Host: {{.host}}
 Port: {{.port}}
+HandlerErrLog: {{.handlerErrLog}}
+
 {{if .mysql}}
 DbConfig:
   Ip: 127.0.0.1

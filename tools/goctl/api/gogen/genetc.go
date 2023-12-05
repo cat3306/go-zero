@@ -31,6 +31,7 @@ func genEtc(dir string, cfg *config.Config, api *spec.ApiSpec, tmpCom string) er
 	data["serviceName"] = service.Name
 	data["host"] = host
 	data["port"] = port
+	data["handlerErrLog"] = true
 	return genFile(fileGenConfig{
 		dir:             dir,
 		subdir:          etcDir,
