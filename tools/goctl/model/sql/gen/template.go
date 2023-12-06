@@ -38,6 +38,7 @@ const (
 	errGormTemplateFile                   = "gorm-err.tpl"
 	methodGormTemplateFile                = "gorm-method.tpl"
 	findGormOneByFieldTemplateFile        = "gorm-find-one-by-field.tpl"
+	modelGormCustomTemplateFile           = "gorm-custom-model.tpl"
 )
 
 var templates = map[string]string{
@@ -70,6 +71,7 @@ var templates = map[string]string{
 	methodGormTemplateFile:                template.GormMethod,
 	findGormOneByFieldTemplateFile:        template.GormFindOneByField,
 	typesGormTemplateFile:                 template.GormTypes,
+	modelGormCustomTemplateFile:           template.GormModelCustom,
 }
 
 // Category returns model const value

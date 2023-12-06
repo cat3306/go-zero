@@ -152,3 +152,6 @@ var GormMethod string
 
 //go:embed tpl/gorm-find-one-by-field.tpl
 var GormFindOneByField string
+
+//go:embed tpl/gorm-custom-model.tpl
+var GormModelCustom string

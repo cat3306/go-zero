@@ -65,7 +65,7 @@ func parseNameOriginal(ts []*parser.Table) (nameOriginals [][]string) {
 }
 
 // Parse parses ddl into golang structure
-func Parse(filename, database string, strict bool) ([]*Table, error) {
+func Parse(filename, database string, strict bool, args ...bool) ([]*Table, error) {
 	p := parser.NewParser()
 	tables, err := p.From(filename)
 	if err != nil {
@@ -128,7 +128,7 @@ func Parse(filename, database string, strict bool) ([]*Table, error) {
 			return nil, fmt.Errorf("%s: unexpected join primary key", prefix)
 		}
 
-		primaryKey, fieldM, err := convertColumns(columns, primaryColumn, strict)
+		primaryKey, fieldM, err := convertColumns(columns, primaryColumn, strict, args...)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +198,7 @@ func checkDuplicateUniqueIndex(uniqueIndex map[string][]*Field, tableName string
 	}
 }
 
-func convertColumns(columns []*parser.Column, primaryColumn string, strict bool) (Primary, map[string]*Field, error) {
+func convertColumns(columns []*parser.Column, primaryColumn string, strict bool, args ...bool) (Primary, map[string]*Field, error) {
 	var (
 		primaryKey Primary
 		fieldM     = make(map[string]*Field)
@@ -227,7 +227,7 @@ func convertColumns(columns []*parser.Column, primaryColumn string, strict bool)
 			}
 		}
 
-		dataType, err := converter.ConvertDataType(column.DataType.Type(), isDefaultNull, column.DataType.Unsigned(), strict)
+		dataType, err := converter.ConvertDataType(column.DataType.Type(), isDefaultNull, column.DataType.Unsigned(), strict, args...)
 		if err != nil {
 			return Primary{}, nil, err
 		}
@@ -272,10 +272,10 @@ func (t *Table) ContainsTime() bool {
 }
 
 // ConvertDataType converts mysql data type into golang data type
-func ConvertDataType(table *model.Table, strict bool) (*Table, error) {
+func ConvertDataType(table *model.Table, strict bool, args ...bool) (*Table, error) {
 	isPrimaryDefaultNull := table.PrimaryKey.ColumnDefault == nil && table.PrimaryKey.IsNullAble == "YES"
 	isPrimaryUnsigned := strings.Contains(table.PrimaryKey.DbColumn.ColumnType, "unsigned")
-	primaryDataType, containsPQ, err := converter.ConvertStringDataType(table.PrimaryKey.DataType, isPrimaryDefaultNull, isPrimaryUnsigned, strict)
+	primaryDataType, containsPQ, err := converter.ConvertStringDataType(table.PrimaryKey.DataType, isPrimaryDefaultNull, isPrimaryUnsigned, strict, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func ConvertDataType(table *model.Table, strict bool) (*Table, error) {
 		AutoIncrement: strings.Contains(table.PrimaryKey.Extra, "auto_increment"),
 	}
 
-	fieldM, err := getTableFields(table, strict)
+	fieldM, err := getTableFields(table, strict, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -358,12 +358,12 @@ func ConvertDataType(table *model.Table, strict bool) (*Table, error) {
 	return &reply, nil
 }
 
-func getTableFields(table *model.Table, strict bool) (map[string]*Field, error) {
+func getTableFields(table *model.Table, strict bool, args ...bool) (map[string]*Field, error) {
 	fieldM := make(map[string]*Field)
 	for _, each := range table.Columns {
 		isDefaultNull := each.ColumnDefault == nil && each.IsNullAble == "YES"
 		isPrimaryUnsigned := strings.Contains(each.ColumnType, "unsigned")
-		dt, containsPQ, err := converter.ConvertStringDataType(each.DataType, isDefaultNull, isPrimaryUnsigned, strict)
+		dt, containsPQ, err := converter.ConvertStringDataType(each.DataType, isDefaultNull, isPrimaryUnsigned, strict, args...)
 		if err != nil {
 			return nil, err
 		}

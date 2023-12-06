@@ -56,23 +56,24 @@ func (g *GormGenerator) genFromDDL(filename string, withCache, strict bool, data
 	map[string]*codeTuple, error,
 ) {
 	m := make(map[string]*codeTuple)
-	tables, err := parser.Parse(filename, database, strict)
+	tables, err := parser.Parse(filename, database, strict, true) //true gorm mode
 	if err != nil {
 		return nil, err
 	}
 
 	for _, e := range tables {
-		code, err := g.genModel(*e, withCache)
+		code, err := g.genModel(*e)
 		if err != nil {
 			return nil, err
 		}
-		//customCode, err := g.genModelCustom(*e, withCache)
-		//if err != nil {
-		//	return nil, err
-		//}
+		customCode, err := g.genModelCustom(*e)
+		if err != nil {
+			return nil, err
+		}
 
 		m[e.Name.Source()] = &codeTuple{
-			modelCode: code,
+			modelCode:       code,
+			modelCustomCode: customCode,
 		}
 	}
 
@@ -81,16 +82,16 @@ func (g *GormGenerator) genFromDDL(filename string, withCache, strict bool, data
 func (g *GormGenerator) StartFromInformationSchema(tables map[string]*model.Table, withCache, strict bool) error {
 	m := make(map[string]*codeTuple)
 	for _, each := range tables {
-		table, err := parser.ConvertDataType(each, strict)
+		table, err := parser.ConvertDataType(each, strict, true) //true gorm mode
 		if err != nil {
 			return err
 		}
 
-		code, err := g.genModel(*table, withCache)
+		code, err := g.genModel(*table)
 		if err != nil {
 			return err
 		}
-		customCode, err := g.genModelCustom(*table, withCache)
+		customCode, err := g.genModelCustom(*table)
 		if err != nil {
 			return err
 		}
@@ -136,6 +137,17 @@ func (g *GormGenerator) createFile(modelList map[string]*codeTuple) error {
 		name := util.SafeString(modelFilename) + "_gen.go"
 		filename := filepath.Join(dirAbs, name)
 		err = os.WriteFile(filename, []byte(codes.modelCode), os.ModePerm)
+		if err != nil {
+			return err
+		}
+
+		name = util.SafeString(modelFilename) + ".go"
+		filename = filepath.Join(dirAbs, name)
+		if pathx.FileExists(filename) {
+			g.Warning("%s already exists, ignored.", name)
+			continue
+		}
+		err = os.WriteFile(filename, []byte(codes.modelCustomCode), os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -204,7 +216,7 @@ func (g *GormGenerator) GenMethod(table Table) (string, error) {
 	}
 	return buffer.String(), nil
 }
-func (g *GormGenerator) genModel(in parser.Table, withCache bool) (string, error) {
+func (g *GormGenerator) genModel(in parser.Table) (string, error) {
 	if len(in.PrimaryKey.Name.Source()) == 0 {
 		return "", fmt.Errorf("table %s: missing primary key", in.Name.Source())
 	}
@@ -244,20 +256,17 @@ func (g *GormGenerator) genModel(in parser.Table, withCache bool) (string, error
 	return output.String(), nil
 }
 
-func (g *GormGenerator) genModelCustom(in parser.Table, withCache bool) (string, error) {
-	text, err := pathx.LoadTemplate(category, modelCustomTemplateFile, template.ModelCustom)
+func (g *GormGenerator) genModelCustom(in parser.Table) (string, error) {
+	text, err := pathx.LoadTemplate(category, modelGormCustomTemplateFile, template.GormModelCustom)
 	if err != nil {
 		return "", err
 	}
 
-	t := util.With("model-custom").
+	t := util.With("gorm-model-custom").
 		Parse(text).
 		GoFmt(true)
 	output, err := t.Execute(map[string]any{
-		"pkg":                   g.pkg,
-		"withCache":             withCache,
-		"upperStartCamelObject": in.Name.ToCamel(),
-		"lowerStartCamelObject": stringx.From(in.Name.ToCamel()).Untitle(),
+		"pkg": g.pkg,
 	})
 	if err != nil {
 		return "", err

@@ -144,17 +144,17 @@ var commonMysqlDataTypeMapString = map[string]string{
 }
 
 // ConvertDataType converts mysql column type into golang type
-func ConvertDataType(dataBaseType int, isDefaultNull, unsigned, strict bool) (string, error) {
+func ConvertDataType(dataBaseType int, isDefaultNull, unsigned, strict bool, args ...bool) (string, error) {
 	tp, ok := commonMysqlDataTypeMapInt[dataBaseType]
 	if !ok {
 		return "", fmt.Errorf("unsupported database type: %v", dataBaseType)
 	}
 
-	return mayConvertNullType(tp, isDefaultNull, unsigned, strict), nil
+	return mayConvertNullType(tp, isDefaultNull, unsigned, strict, args...), nil
 }
 
 // ConvertStringDataType converts mysql column type into golang type
-func ConvertStringDataType(dataBaseType string, isDefaultNull, unsigned, strict bool) (
+func ConvertStringDataType(dataBaseType string, isDefaultNull, unsigned, strict bool, args ...bool) (
 	goType string, isPQArray bool, err error) {
 	tp, ok := commonMysqlDataTypeMapString[strings.ToLower(dataBaseType)]
 	if !ok {
@@ -165,11 +165,11 @@ func ConvertStringDataType(dataBaseType string, isDefaultNull, unsigned, strict 
 		return tp, true, nil
 	}
 
-	return mayConvertNullType(tp, isDefaultNull, unsigned, strict), false, nil
+	return mayConvertNullType(tp, isDefaultNull, unsigned, strict, args...), false, nil
 }
 
-func mayConvertNullType(goDataType string, isDefaultNull, unsigned, strict bool) string {
-	if !isDefaultNull {
+func mayConvertNullType(goDataType string, isDefaultNull, unsigned, strict bool, args ...bool) string {
+	if !isDefaultNull || len(args) != 0 { //gorm mode  len(args)!=0
 		if unsigned && strict {
 			ret, ok := unsignedTypeMap[goDataType]
 			if ok {
