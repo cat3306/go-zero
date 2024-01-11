@@ -1,5 +1,8 @@
 ## change
 
+### 修改
+支持自定义time类型 JsonTime
+如果time类型字段有默认值，生成gorm字段时标识为只读字段
 ### 支持`gorm`风格的`model`生成
 
 - ddl

@@ -49,7 +49,7 @@ func gormGenImports(timeImport bool) (string, error) {
 	}
 
 	buffer, err := util.With("import").Parse(text).Execute(map[string]any{
-		"time": timeImport,
+		"time": false, //use JsonTime not need import time.Time more details see gorm-err.tpl
 	})
 	if err != nil {
 		return "", err

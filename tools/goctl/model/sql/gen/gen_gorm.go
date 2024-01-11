@@ -3,6 +3,9 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/model"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
@@ -11,8 +14,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
-	"os"
-	"path/filepath"
 )
 
 type GormGenerator struct {
@@ -136,7 +137,7 @@ func (g *GormGenerator) createFile(modelList map[string]*codeTuple) error {
 
 		name := util.SafeString(modelFilename) + "_gen.go"
 		filename := filepath.Join(dirAbs, name)
-		err = os.WriteFile(filename, []byte(codes.modelCode), os.ModePerm)
+		err = os.WriteFile(filename, []byte(codes.modelCode), 0644)
 		if err != nil {
 			return err
 		}
@@ -147,7 +148,7 @@ func (g *GormGenerator) createFile(modelList map[string]*codeTuple) error {
 			g.Warning("%s already exists, ignored.", name)
 			continue
 		}
-		err = os.WriteFile(filename, []byte(codes.modelCustomCode), os.ModePerm)
+		err = os.WriteFile(filename, []byte(codes.modelCustomCode), 0644)
 		if err != nil {
 			return err
 		}

@@ -45,6 +45,8 @@ type (
 		SeqInIndex      int
 		OrdinalPosition int
 		ContainsPQ      bool
+		HasDefaultValue bool
+		IsTime          bool
 	}
 
 	// KeyType types alias of int
@@ -246,7 +248,8 @@ func convertColumns(columns []*parser.Column, primaryColumn string, strict bool,
 		field.Name = stringx.From(column.Name)
 		field.DataType = dataType
 		field.Comment = util.TrimNewLine(comment)
-
+		field.HasDefaultValue = column.Constraint.HasDefaultValue
+		field.IsTime = field.DataType == timeImport
 		if field.Name.Source() == primaryColumn {
 			primaryKey = Primary{
 				Field: field,
@@ -380,6 +383,8 @@ func getTableFields(table *model.Table, strict bool, args ...bool) (map[string]*
 			SeqInIndex:      columnSeqInIndex,
 			OrdinalPosition: each.OrdinalPosition,
 			ContainsPQ:      containsPQ,
+			IsTime:          dt == timeImport,
+			HasDefaultValue: each.ColumnDefault != nil,
 		}
 		fieldM[each.Name] = field
 	}

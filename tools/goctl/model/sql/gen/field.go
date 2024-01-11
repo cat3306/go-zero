@@ -53,7 +53,7 @@ func genField(table Table, field *parser.Field) (string, error) {
 }
 
 func genGormField(table Table, field *parser.Field) (string, error) {
-	tag, err := genGormTag(table, field.NameOriginal)
+	tag, err := genGormTag(table, field)
 	if err != nil {
 		return "", err
 	}
@@ -87,7 +87,7 @@ func genGormFields(table Table, fields []*parser.Field) (string, error) {
 		if err != nil {
 			return "", err
 		}
-
+		result = strings.ReplaceAll(result, "time.Time", "JsonTime")
 		list = append(list, result)
 	}
 

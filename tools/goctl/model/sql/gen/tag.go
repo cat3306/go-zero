@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/template"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -27,7 +28,8 @@ func genTag(table Table, in string) (string, error) {
 	return output.String(), nil
 }
 
-func genGormTag(table Table, in string) (string, error) {
+func genGormTag(table Table, field *parser.Field) (string, error) {
+	in := field.NameOriginal
 	if in == "" {
 		return in, nil
 	}
@@ -37,8 +39,9 @@ func genGormTag(table Table, in string) (string, error) {
 	}
 
 	output, err := util.With("tag").Parse(text).Execute(map[string]any{
-		"field": in,
-		"data":  table,
+		"field":                    in,
+		"isTimeAndHasDefaultValue": field.IsTime && field.HasDefaultValue,
+		"data":                     table,
 	})
 	if err != nil {
 		return "", err
